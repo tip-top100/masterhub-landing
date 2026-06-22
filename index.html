@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>МастерХаб — CRM в кармане мастера по ремонту техники</title>
+<meta name="description" content="МастерХаб — приложение для частных мастеров по ремонту бытовой техники: ИИ-приём заявок, подбор запчастей, прайс и склад, постоплата и должники, юрлица, квитанции и отчёты. Данные хранятся локально на телефоне." />
+<meta property="og:title" content="МастерХаб — CRM в кармане мастера" />
+<meta property="og:description" content="Заявки голосом и текстом разбирает ИИ. Постоплата, должники, юрлица, прайс, склад, квитанции и отчёты. Всё на твоём телефоне." />
+<meta property="og:type" content="website" />
+<style>
+  /* ─────────────────────────────────────────────────────────────
+     ССЫЛКА НА RUSTORE — поменяй один раз здесь (data-rustore внизу в JS)
+     ───────────────────────────────────────────────────────────── */
+  :root{
+    --bg:#0b1220;
+    --bg2:#0f1830;
+    --panel:#141f3a;
+    --panel2:#19264a;
+    --line:#243358;
+    --text:#eaf0ff;
+    --muted:#9fb0d4;
+    --blue:#2f6fed;
+    --blue2:#1565c0;
+    --purple:#7c4dff;
+    --green:#22c55e;
+    --orange:#f59e0b;
+    --red:#ef4444;
+    --radius:18px;
+    --maxw:1120px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    background:radial-gradient(1200px 700px at 80% -10%,#16244a 0%,var(--bg) 55%) no-repeat,var(--bg);
+    color:var(--text);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  .accent{color:var(--blue)}
+  .accent-p{color:var(--purple)}
+
+  /* ── Header ── */
+  header{
+    position:sticky;top:0;z-index:50;
+    backdrop-filter:blur(10px);
+    background:rgba(11,18,32,.72);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}
+  .logo .mark{
+    width:34px;height:34px;border-radius:10px;
+    background:linear-gradient(135deg,var(--blue),var(--purple));
+    display:flex;align-items:center;justify-content:center;font-size:18px;
+    box-shadow:0 6px 18px rgba(47,111,237,.45);
+  }
+  .nav-links{display:flex;gap:26px;align-items:center}
+  .nav-links a{color:var(--muted);font-size:15px;transition:color .2s}
+  .nav-links a:hover{color:var(--text)}
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:11px 18px;border-radius:12px;font-weight:700;font-size:15px;
+    border:1px solid transparent;cursor:pointer;transition:transform .15s,box-shadow .2s,background .2s;
+    white-space:nowrap;
+  }
+  .btn-primary{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;box-shadow:0 8px 22px rgba(47,111,237,.4)}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(47,111,237,.55)}
+  .btn-ghost{background:transparent;border-color:var(--line);color:var(--text)}
+  .btn-ghost:hover{background:var(--panel)}
+  .nav .btn{padding:9px 16px}
+  @media(max-width:760px){.nav-links{display:none}}
+
+  /* ── Hero ── */
+  .hero{padding:64px 0 40px;position:relative}
+  .hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);
+    background:var(--panel);border:1px solid var(--line);padding:7px 13px;border-radius:999px;margin-bottom:20px;
+  }
+  .badge .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(34,197,94,.18)}
+  h1{font-size:clamp(34px,5vw,54px);line-height:1.08;font-weight:850;letter-spacing:-.5px}
+  h1 .grad{background:linear-gradient(120deg,#5b9dff,#a17bff);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{margin-top:18px;font-size:clamp(16px,2vw,19px);color:var(--muted);max-width:540px}
+  .hero-cta{display:flex;gap:14px;margin-top:28px;flex-wrap:wrap}
+  .hero-meta{margin-top:22px;display:flex;gap:22px;flex-wrap:wrap;color:var(--muted);font-size:14px}
+  .hero-meta b{color:var(--text)}
+  .hero-meta span{display:flex;align-items:center;gap:7px}
+
+  /* ── Phone mockup (рисованный) ── */
+  .phone-stage{display:flex;justify-content:center;position:relative}
+  .glow{position:absolute;inset:0;filter:blur(60px);opacity:.5;
+    background:radial-gradient(280px 360px at 60% 40%,rgba(124,77,255,.55),transparent 70%),
+              radial-gradient(280px 360px at 35% 65%,rgba(47,111,237,.55),transparent 70%);z-index:0}
+  .phone{
+    position:relative;z-index:1;width:288px;height:590px;border-radius:42px;
+    background:linear-gradient(160deg,#1b2540,#0e1730);
+    border:1px solid #2b3a63;padding:12px;
+    box-shadow:0 40px 80px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .phone .notch{position:absolute;top:16px;left:50%;transform:translateX(-50%);
+    width:120px;height:24px;background:#0a1122;border-radius:0 0 16px 16px;z-index:3}
+  .screen{height:100%;border-radius:32px;overflow:hidden;background:var(--bg2);display:flex;flex-direction:column}
+  .scr-top{background:linear-gradient(135deg,var(--blue2),#0f4ea0);padding:34px 16px 14px;color:#fff}
+  .scr-top .st-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;opacity:.85}
+  .scr-top h3{font-size:19px;margin-top:8px;font-weight:800}
+  .scr-top p{font-size:12px;opacity:.9;margin-top:2px}
+  .scr-tabs{display:flex;gap:8px;padding:12px 12px 4px}
+  .scr-tabs .t{font-size:11px;padding:6px 10px;border-radius:999px;background:var(--panel);color:var(--muted)}
+  .scr-tabs .t.on{background:var(--blue);color:#fff}
+  .scr-body{padding:8px 12px;display:flex;flex-direction:column;gap:9px;overflow:hidden}
+  .ocard{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--blue);
+    border-radius:12px;padding:10px 11px}
+  .ocard.green{border-left-color:var(--green)}
+  .ocard.orange{border-left-color:var(--orange)}
+  .ocard .oc-top{display:flex;justify-content:space-between;align-items:center}
+  .ocard .nm{font-weight:700;font-size:13px}
+  .ocard .pill{font-size:10px;padding:3px 8px;border-radius:999px;background:rgba(47,111,237,.18);color:#7aa6ff}
+  .ocard .pill.g{background:rgba(34,197,94,.16);color:#67e08a}
+  .ocard .pill.o{background:rgba(245,158,11,.16);color:#ffc862}
+  .ocard .meta{font-size:11px;color:var(--muted);margin-top:5px;display:flex;gap:10px;flex-wrap:wrap}
+  .ocard .sum{font-weight:800;font-size:13px}
+  .scr-fab{margin:auto 12px 14px;background:linear-gradient(135deg,var(--blue),var(--blue2));
+    color:#fff;text-align:center;padding:11px;border-radius:14px;font-weight:700;font-size:13px;
+    box-shadow:0 8px 20px rgba(47,111,237,.45)}
+
+  @media(max-width:900px){.hero-grid{grid-template-columns:1fr;text-align:center}
+    .sub,.badge{margin-left:auto;margin-right:auto}.hero-cta,.hero-meta{justify-content:center}
+    .phone-stage{margin-top:20px}}
+
+  /* ── Sections ── */
+  section{padding:70px 0}
+  .eyebrow{color:var(--blue);font-weight:800;letter-spacing:1.5px;font-size:13px;text-transform:uppercase}
+  .h2{font-size:clamp(26px,3.4vw,38px);font-weight:850;margin-top:10px;letter-spacing:-.4px}
+  .lead{color:var(--muted);font-size:17px;margin-top:12px;max-width:680px}
+  .center{text-align:center}
+  .center .lead{margin-left:auto;margin-right:auto}
+
+  /* боль */
+  .pains{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:36px}
+  .pain{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+  .pain .ic{font-size:26px}
+  .pain h4{margin:12px 0 6px;font-size:17px}
+  .pain p{color:var(--muted);font-size:14px}
+  .pain .fix{margin-top:12px;font-size:13px;color:#67e08a;display:flex;gap:7px;align-items:flex-start}
+
+  /* фичи */
+  .features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px}
+  .feat{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);
+    border-radius:var(--radius);padding:22px;transition:transform .2s,border-color .2s}
+  .feat:hover{transform:translateY(-4px);border-color:#3a4f86}
+  .feat .ic{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+    font-size:23px;background:rgba(47,111,237,.14);border:1px solid rgba(47,111,237,.25)}
+  .feat h4{margin:14px 0 7px;font-size:17px}
+  .feat p{color:var(--muted);font-size:14px}
+
+  /* spotlight */
+  .spot{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:40px}
+  .spot-card{border-radius:24px;padding:30px;border:1px solid var(--line);position:relative;overflow:hidden}
+  .spot-card.blue{background:linear-gradient(160deg,rgba(47,111,237,.16),var(--panel))}
+  .spot-card.purple{background:linear-gradient(160deg,rgba(124,77,255,.16),var(--panel))}
+  .spot-card .tag{font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase}
+  .spot-card.blue .tag{color:#7aa6ff}
+  .spot-card.purple .tag{color:#b79bff}
+  .spot-card h3{font-size:24px;margin:10px 0 10px;font-weight:850}
+  .spot-card p{color:var(--muted);font-size:15px}
+  .spot-card ul{list-style:none;margin-top:16px;display:flex;flex-direction:column;gap:10px}
+  .spot-card li{display:flex;gap:10px;align-items:flex-start;font-size:14.5px}
+  .spot-card li .c{color:var(--green);font-weight:800}
+
+  /* приватность */
+  .privacy{background:linear-gradient(160deg,var(--panel2),var(--bg2));border:1px solid var(--line);
+    border-radius:24px;padding:40px;display:flex;gap:26px;align-items:center;margin-top:30px}
+  .privacy .big{font-size:46px}
+  .privacy h3{font-size:24px;font-weight:850}
+  .privacy p{color:var(--muted);margin-top:8px;max-width:680px}
+
+  /* шаги */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:40px}
+  .step{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:24px;position:relative}
+  .step .n{position:absolute;top:-16px;left:22px;width:36px;height:36px;border-radius:10px;
+    background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;
+    font-weight:800;box-shadow:0 8px 18px rgba(47,111,237,.4)}
+  .step h4{margin:16px 0 7px;font-size:18px}
+  .step p{color:var(--muted);font-size:14px}
+
+  /* FAQ */
+  .faq{margin-top:34px;display:flex;flex-direction:column;gap:12px;max-width:820px}
+  details{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:4px 18px}
+  summary{cursor:pointer;padding:16px 0;font-weight:700;font-size:16px;list-style:none;display:flex;justify-content:space-between;align-items:center}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";color:var(--blue);font-size:22px;font-weight:700}
+  details[open] summary::after{content:"–"}
+  details p{color:var(--muted);padding:0 0 16px;font-size:14.5px}
+
+  /* CTA bottom */
+  .cta{background:linear-gradient(135deg,rgba(47,111,237,.18),rgba(124,77,255,.18));
+    border:1px solid var(--line);border-radius:28px;padding:48px 30px;text-align:center;margin-top:20px}
+  .cta h2{font-size:clamp(26px,3.6vw,40px);font-weight:850}
+  .cta p{color:var(--muted);margin-top:12px;font-size:17px}
+  .cta .hero-cta{justify-content:center;margin-top:26px}
+
+  /* footer */
+  footer{border-top:1px solid var(--line);padding:40px 0 60px;margin-top:50px;color:var(--muted);font-size:14px}
+  .foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center}
+  .foot a{color:var(--muted)}.foot a:hover{color:var(--text)}
+  .foot-links{display:flex;gap:22px;flex-wrap:wrap}
+
+  .reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  @media(max-width:820px){
+    .pains,.features,.steps{grid-template-columns:1fr}
+    .spot{grid-template-columns:1fr}
+    .privacy{flex-direction:column;text-align:center}
+    .features{grid-template-columns:1fr 1fr}
+  }
+  @media(max-width:560px){.features{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="logo"><span class="mark">🔧</span> МастерХаб</div>
+    <nav class="nav-links">
+      <a href="#features">Возможности</a>
+      <a href="#money">Деньги</a>
+      <a href="#how">Как начать</a>
+      <a href="#faq">Вопросы</a>
+    </nav>
+    <a class="btn btn-primary js-install">Установить</a>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="reveal">
+      <div class="badge"><span class="dot"></span> Для мастеров по ремонту бытовой техники</div>
+      <h1>Вся работа мастера —<br><span class="grad">в одном приложении</span></h1>
+      <p class="sub">Приём заявок голосом и текстом разбирает ИИ. Запчасти, прайс, склад, квитанции, отчёты, постоплата и юрлица. Без бумажек и таблиц — всё в телефоне.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary js-install">⬇️ Установить из RuStore</a>
+        <a class="btn btn-ghost" href="#features">Смотреть возможности</a>
+      </div>
+      <div class="hero-meta">
+        <span>🔒 <b>Данные на телефоне</b></span>
+        <span>🤖 <b>ИИ-помощник</b></span>
+        <span>📴 <b>Работает в поле</b></span>
+      </div>
+    </div>
+
+    <div class="phone-stage reveal">
+      <div class="glow"></div>
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="screen">
+          <div class="scr-top">
+            <div class="st-row"><span>20:01</span><span>▮▮▮ ▮ 83%</span></div>
+            <h3>Заказы</h3>
+            <p>Сегодня · 6 активных</p>
+          </div>
+          <div class="scr-tabs">
+            <span class="t on">Активные</span>
+            <span class="t">Выполнено</span>
+            <span class="t">Задачи</span>
+          </div>
+          <div class="scr-body">
+            <div class="ocard">
+              <div class="oc-top"><span class="nm">Дмитрий · Bosch</span><span class="pill">В работе</span></div>
+              <div class="meta"><span>📍 Садовая 8</span><span>🕒 20:00</span></div>
+            </div>
+            <div class="ocard orange">
+              <div class="oc-top"><span class="nm">ООО «Орбита»</span><span class="pill o">Постоплата</span></div>
+              <div class="meta"><span>📍 Невский 100</span><span class="sum">3 500 ₽</span></div>
+            </div>
+            <div class="ocard green">
+              <div class="oc-top"><span class="nm">Анна · Indesit</span><span class="pill g">Выполнено</span></div>
+              <div class="meta"><span>замена ТЭНа</span><span class="sum">2 800 ₽</span></div>
+            </div>
+          </div>
+          <div class="scr-fab">＋ Новый заказ</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- БОЛЬ -->
+<section id="pain">
+  <div class="wrap">
+    <div class="center reveal">
+      <div class="eyebrow">Знакомо?</div>
+      <div class="h2">Заявки в блокноте — деньги мимо кассы</div>
+    </div>
+    <div class="pains">
+      <div class="pain reveal">
+        <div class="ic">📓</div>
+        <h4>Заявки разбросаны</h4>
+        <p>Записи в блокноте, переписки, звонки — что-то теряется, кто-то ждёт зря.</p>
+        <div class="fix">✓ Все заявки в одном списке, ИИ разбирает их голосом и текстом</div>
+      </div>
+      <div class="pain reveal">
+        <div class="ic">💸</div>
+        <h4>Постоплата забывается</h4>
+        <p>Сделал «в долг» по организации — а потом не вспомнить, кто сколько должен.</p>
+        <div class="fix">✓ Раздел «Должники» и сверка по юрлицам с суммой долга</div>
+      </div>
+      <div class="pain reveal">
+        <div class="ic">🔧</div>
+        <h4>Запчасть не подобрать</h4>
+        <p>Ищешь артикул по модели, бегаешь по магазинам, тратишь время на выезде.</p>
+        <div class="fix">✓ ИИ по шильдику подбирает деталь и сразу ссылки на магазины</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ФИЧИ -->
+<section id="features">
+  <div class="wrap">
+    <div class="center reveal">
+      <div class="eyebrow">Возможности</div>
+      <div class="h2">Всё, что нужно мастеру на выезде</div>
+      <p class="lead">От приёма заявки до квитанции с гарантией — каждый шаг закрыт прямо в телефоне.</p>
+    </div>
+    <div class="features">
+      <div class="feat reveal"><div class="ic">🤖</div><h4>ИИ-приём заявки</h4><p>Вставь или продиктуй текст — приложение само разберёт имя, адрес, технику, поломку и время.</p></div>
+      <div class="feat reveal"><div class="ic">🎙️</div><h4>Голосовой ввод</h4><p>Надиктуй заявку обычными словами — она превратится в готовую карточку заказа.</p></div>
+      <div class="feat reveal"><div class="ic">🏷️</div><h4>Распознавание шильдика</h4><p>Сфотографируй табличку — ИИ определит модель, серийник и подскажет запчасти.</p></div>
+      <div class="feat reveal"><div class="ic">🔍</div><h4>Подбор запчастей</h4><p>Спроси деталь — получишь название и артикул, плюс кнопки поиска по WB, Ozon, Avito и своим магазинам.</p></div>
+      <div class="feat reveal"><div class="ic">💰</div><h4>Прайс и смета</h4><p>Свой прайс работ под рукой. Смета собирается в пару тапов и уходит в квитанцию.</p></div>
+      <div class="feat reveal"><div class="ic">📦</div><h4>Склад запчастей</h4><p>Учёт деталей с количеством и ценой. Списание на заказ добавляет расход автоматически.</p></div>
+      <div class="feat reveal"><div class="ic">🧾</div><h4>Квитанция и гарантия</h4><p>PDF с перечнем работ, деталей и сроком гарантии — отправь клиенту в один тап.</p></div>
+      <div class="feat reveal"><div class="ic">📊</div><h4>Отчёты и деньги</h4><p>Выручка, расходы, прибыль, средний чек, топ техники и выгрузка в CSV для бухгалтера.</p></div>
+      <div class="feat reveal"><div class="ic">🔔</div><h4>Напоминания</h4><p>За час до визита и в день ТО — приложение само напомнит, ничего не забудешь.</p></div>
+      <div class="feat reveal"><div class="ic">🪪</div><h4>Визитка с QR</h4><p>Отправь клиенту контакт или PDF-визитку с QR — звонок и SMS в один тап.</p></div>
+      <div class="feat reveal"><div class="ic">🗺️</div><h4>Навигатор</h4><p>Адрес клиента открывается в Яндекс, 2ГИС или Google Maps — на выбор.</p></div>
+      <div class="feat reveal"><div class="ic">↔️</div><h4>Передача заказа</h4><p>Не успеваешь — передай заказ другому мастеру прямо из приложения.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ДЕНЬГИ: постоплата + юрлица -->
+<section id="money">
+  <div class="wrap">
+    <div class="center reveal">
+      <div class="eyebrow">Новое в 1.0.5</div>
+      <div class="h2">Контроль денег: постоплата и юрлица</div>
+      <p class="lead">Работаешь с организациями «в долг»? Теперь видно, кто и сколько должен — и ни рубля мимо.</p>
+    </div>
+    <div class="spot">
+      <div class="spot-card blue reveal">
+        <div class="tag">Постоплата · Должники</div>
+        <h3>Деньги под контролем</h3>
+        <p>Закрывай заказ «в долг» одним тапом и отмечай оплату, когда деньги пришли.</p>
+        <ul>
+          <li><span class="c">✓</span> Тип оплаты «Постоплата» при закрытии заказа</li>
+          <li><span class="c">✓</span> Раздел «Должники»: список и общая сумма долга</li>
+          <li><span class="c">✓</span> Отметка оплаты по одному заказу или всех сразу</li>
+          <li><span class="c">✓</span> В отчёте видно, сколько ещё «не дополучено»</li>
+        </ul>
+      </div>
+      <div class="spot-card purple reveal">
+        <div class="tag">Юрлица · Сверка</div>
+        <h3>Организации и адреса</h3>
+        <p>Заведи контрагента с несколькими точками и создавай заявки тапом по адресу.</p>
+        <ul>
+          <li><span class="c">✓</span> Юрлицо с описанием и несколькими адресами</li>
+          <li><span class="c">✓</span> Заказ по адресу — в одно касание</li>
+          <li><span class="c">✓</span> Сверка постоплаты по каждому юрлицу</li>
+          <li><span class="c">✓</span> Видно неоплаченные и уже оплаченные</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ПРИВАТНОСТЬ -->
+<section id="privacy" style="padding-top:10px">
+  <div class="wrap">
+    <div class="privacy reveal">
+      <div class="big">🔒</div>
+      <div>
+        <h3>Твоя база — только твоя</h3>
+        <p>Заказы, клиенты, склад и прайс хранятся локально на твоём телефоне, а не на чужом сервере. Резервная копия делается автоматически и включает юрлица и постоплату — восстановишь всё в пару тапов.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- КАК НАЧАТЬ -->
+<section id="how">
+  <div class="wrap">
+    <div class="center reveal">
+      <div class="eyebrow">Как начать</div>
+      <div class="h2">Три шага — и ты в работе</div>
+    </div>
+    <div class="steps">
+      <div class="step reveal"><div class="n">1</div><h4>Установи приложение</h4><p>Скачай МастерХаб из RuStore и зарегистрируйся по номеру телефона.</p></div>
+      <div class="step reveal"><div class="n">2</div><h4>Заведи первый заказ</h4><p>Продиктуй или вставь заявку — ИИ соберёт карточку клиента за секунды.</p></div>
+      <div class="step reveal"><div class="n">3</div><h4>Работай и считай прибыль</h4><p>Закрывай заказы, отправляй квитанции и смотри отчёт по деньгам.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="center reveal">
+      <div class="eyebrow">Вопросы</div>
+      <div class="h2">Частые вопросы</div>
+    </div>
+    <div class="faq">
+      <details class="reveal"><summary>Нужен ли интернет?</summary><p>Заявки, склад, прайс и отчёты работают и без сети — данные на телефоне. Интернет нужен только для ИИ-функций (разбор заявки, подбор запчастей, распознавание шильдика).</p></details>
+      <details class="reveal"><summary>Где хранятся мои данные?</summary><p>Локально на вашем устройстве. Сервер используется только для ИИ-запросов и подписки. Резервную копию можно сохранить себе в любой момент.</p></details>
+      <details class="reveal"><summary>Подойдёт ли для работы с организациями?</summary><p>Да. Раздел «Юрлица» хранит контрагентов с несколькими адресами, а «Сверка постоплаты» показывает долги по каждому из них.</p></details>
+      <details class="reveal"><summary>Что насчёт постоплаты?</summary><p>Закрывайте заказ типом «Постоплата», а когда деньги придут — отмечайте оплату в разделе «Должники». В отчёте всегда видно сумму долга.</p></details>
+      <details class="reveal"><summary>Сколько стоит?</summary><p>После регистрации доступен пробный период. Подробные условия — внутри приложения в разделе «Подписка».</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="cta reveal">
+      <h2>Наведи порядок в заявках уже сегодня</h2>
+      <p>Установи МастерХаб и веди всю работу из телефона.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary js-install">⬇️ Установить из RuStore</a>
+        <a class="btn btn-ghost" href="#features">Возможности</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <div class="logo"><span class="mark">🔧</span> МастерХаб</div>
+    <div class="foot-links">
+      <a href="#features">Возможности</a>
+      <a href="#faq">Вопросы</a>
+      <a class="js-privacy" href="#">Политика конфиденциальности</a>
+      <a class="js-terms" href="#">Условия использования</a>
+    </div>
+    <div>© <span id="year"></span> МастерХаб</div>
+  </div>
+</footer>
+
+<script>
+  // ─────────────────────────────────────────────────────────────
+  // НАСТРОЙКИ ССЫЛОК — поменяй здесь
+  // ─────────────────────────────────────────────────────────────
+  var RUSTORE_URL  = "https://www.rustore.ru/catalog/app/masterhub"; // ← вставь реальную ссылку
+  var PRIVACY_URL  = "#"; // ссылка на политику (или оставь #)
+  var TERMS_URL    = "#"; // ссылка на условия
+
+  document.querySelectorAll('.js-install').forEach(function(a){ a.href = RUSTORE_URL; a.target="_blank"; a.rel="noopener"; });
+  document.querySelectorAll('.js-privacy').forEach(function(a){ a.href = PRIVACY_URL; });
+  document.querySelectorAll('.js-terms').forEach(function(a){ a.href = TERMS_URL; });
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // Появление блоков при прокрутке
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, {threshold:.12});
+  document.querySelectorAll('.reveal').forEach(function(el,i){
+    el.style.transitionDelay = (Math.min(i%3,2)*0.08)+'s';
+    io.observe(el);
+  });
+</script>
+</body>
+</html>
